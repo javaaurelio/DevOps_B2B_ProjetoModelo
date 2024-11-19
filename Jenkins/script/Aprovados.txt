@@ -1,0 +1,28 @@
+import org.jenkinsci.plugins.scriptsecurity.scripts.*
+      ScriptApproval scriptApproval = ScriptApproval.get()
+      [
+        'method groovy.json.JsonSlurperClassic parseText java.lang.String',
+        'method groovy.lang.GroovyObject invokeMethod java.lang.String java.lang.Object',
+        'method hudson.model.PersistenceRoot getRootDir',
+        'method java.io.File getAbsolutePath',
+        'method java.util.Properties getProperty java.lang.String',
+        'method java.util.Properties load java.io.InputStream',
+        'method java.util.Properties setProperty java.lang.String java.lang.String',
+        'method java.util.Properties store java.io.OutputStream java.lang.String',
+        'method java.util.logging.LogManager getLogger java.lang.String',
+        'method java.util.logging.Logger info java.lang.String',
+        'new groovy.json.JsonSlurperClassic',
+        'new java.io.File java.lang.String',
+        'new java.io.FileOutputStream java.lang.String',
+        'new java.util.Properties',
+        'staticMethod java.lang.System getenv java.lang.String',
+        'staticMethod java.lang.System setProperty java.lang.String java.lang.String',
+        'staticMethod java.util.logging.LogManager getLogManager',
+        'staticMethod jenkins.model.Jenkins getInstance',
+        'staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getText java.io.File',
+        'staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods newDataInputStream java.io.File'
+      ].each { hash -> scriptApproval.approveSignature(hash) }
+      [
+        'staticMethod java.lang.System getenv java.lang.String'
+      ].each { hash -> scriptApproval.aclApproveSignature(hash) }
+      scriptApproval.save()
