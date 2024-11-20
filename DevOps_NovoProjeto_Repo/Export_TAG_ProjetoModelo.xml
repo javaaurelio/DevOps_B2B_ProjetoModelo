@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SI_RESOURCES xmlns="http://www.stercomm.com/SI/SI_IE_Resources" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+GISVersion="6100" resourceTag="_siglaProjeto_" FrameworkVersion="2">
+   <BPDEFS>
+      <BPDEF>
+         <LangResource>SIB64ENCODEPHByb2Nlc3MgbmFtZT0iUHJvamV0b19BX0JQTW9kZWxvIj4NCjxzZXF1ZW5jZSBuYW1lPSJpbmljaW8iPg0KPGFzc2lnbiBuYW1lPSJ0aW1lc3RhbXAiIHRvPSJ0aW1lc3RhbXAiIGZyb209InRpbWVzdGFtcCgpIi8+DQo8YXNzaWduIG5hbWU9Ikp1c3RTb21lSUQiIHRvPSJKdXN0U29tZUlEIiBmcm9tPSJnZXRVbmlxdWVJRCgpIi8+DQo8YXNzaWduIG5hbWU9Im15RW5jb2RlZHN0cmluZyIgdG89Im15RW5jb2RlZHN0cmluZyIgZnJvbT0idXJsRW5jb2RlKCd0ZXN0IFN0cmluZycpIi8+DQo8YXNzaWduIG5hbWU9Im5vdyIgdG89Im5vdyIgZnJvbT0ibm93KCkiLz4NCjwvc2VxdWVuY2U+DQo8L3Byb2Nlc3M+</LangResource>
+         <ConfigResource>
+            <ConfDescription>_comentarioBpProjeto_</ConfDescription>
+            <ConfProcessName>_siglaProjeto__BP_Modelo</ConfProcessName>
+            <ConfWFDID>20888</ConfWFDID>
+            <ConfWFDVersion>1</ConfWFDVersion>
+            <OBJECT_VERSION>1</OBJECT_VERSION>
+            <SIResourceDefaultVersion>true</SIResourceDefaultVersion>
+            <ConfPersist>4</ConfPersist>
+            <ConfLifeSpan>-1</ConfLifeSpan>
+            <ConfExpedite>false</ConfExpedite>
+            <ConfRemoval>1</ConfRemoval>
+            <ConfDocStorage>4</ConfDocStorage>
+            <ConfPriority>1</ConfPriority>
+            <ConfRecoveryLevel>3</ConfRecoveryLevel>
+            <ConfSoftstopRecoveryLevel>103</ConfSoftstopRecoveryLevel>
+            <ConfOnfaultFlag>false</ConfOnfaultFlag>
+            <ConfStatus>1</ConfStatus>
+            <ConfLastUsed>dash_oper</ConfLastUsed>
+            <ConfEncoding>None</ConfEncoding>
+            <ConfType>1</ConfType>
+            <ConfDocTracking>false</ConfDocTracking>
+            <ConfDeadLineInterval>-1</ConfDeadLineInterval>
+            <ConfFirstNotifyInterval>-1</ConfFirstNotifyInterval>
+            <ConfSecondNotifyInterval>-1</ConfSecondNotifyInterval>
+            <ConfEventLevel>2</ConfEventLevel>
+            <ConfCategory>_siglaProjeto_</ConfCategory>
+            <ConfPreferredNode />
+            <ConfMandatoryNode />
+            <ConfRoleNode />
+            <ConfTransaction>false</ConfTransaction>
+            <ConfCommitOnError>true</ConfCommitOnError>
+         </ConfigResource>
+      </BPDEF>
+   </BPDEFS>
+</SI_RESOURCES>
