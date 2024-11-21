@@ -128,11 +128,11 @@ pipeline {
             }
         }
     
-    stage(&apos;Publicando&apos;) {
+    stage(&apos;Publicando - B2B&apos;) {
             steps {
                 sshagent([&apos;login_fabio&apos;]) {
                     script {
-                         currentBuild.displayName = &apos;Versao: ${params.Versao}&apos;                        
+                         currentBuild.displayName = &quot;Versao: ${params.Versao}&quot;                        
                         try {
                             maskPasswords(varPasswordPairs: [[password: &quot;${Senha}&quot;]]){
                                sh(&quot;ssh -o StrictHostKeyChecking=no -l ${USUARIO_linux} ${HOST_linux} &apos;/opt/IBM/SterlingIntegrator/tp_import/import.sh -numberOfThreads 5 -update -input /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml -passphrase ${Senha} -report /tmp/jenkins/$BUILD_TAG/SAIDA.report &gt; /tmp/jenkins/$BUILD_TAG/SAIDA_COMMANDO.log | exit 0; &apos;&quot;)
@@ -175,7 +175,7 @@ pipeline {
         
 
        
-        stage(&apos;Publicando Properties Http&apos;) {
+        stage(&apos;Publicando Properties - B2B&apos;) {
             steps {
 
                 sshagent([&apos;login_fabio&apos;]) {
@@ -233,7 +233,7 @@ pipeline {
             }            
         }
         
-        stage(&apos;CacheRefresh&apos;) {
+        stage(&apos;CacheRefresh - B2B&apos;) {
             steps {
                 
                 sshagent([&apos;login_fabio&apos;]) {
