@@ -1,0 +1,35 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<scriptler plugin="scriptler@376.v152edd95b_ca_f">
+  <scriptSet class="sorted-set">
+    <script>
+      <id>ClusterB2B.groovy</id>
+      <name>ClusterB2B.groovy</name>
+      <comment></comment>
+      <parameters/>
+      <available>true</available>
+      <nonAdministerUsing>true</nonAdministerUsing>
+      <onlyMaster>false</onlyMaster>
+    </script>
+    <script>
+      <id>EnvironmentB2B.Config.groovy</id>
+      <name>EnvironmentB2B.Config.groovy</name>
+      <comment></comment>
+      <parameters/>
+      <available>true</available>
+      <nonAdministerUsing>false</nonAdministerUsing>
+      <onlyMaster>false</onlyMaster>
+    </script>
+    <script>
+      <id>EnvironmentB2B.groovy</id>
+      <name>EnvironmentB2B.groovy</name>
+      <comment></comment>
+      <parameters/>
+      <available>true</available>
+      <nonAdministerUsing>true</nonAdministerUsing>
+      <onlyMaster>false</onlyMaster>
+    </script>
+  </scriptSet>
+  <disbableRemoteCatalog>false</disbableRemoteCatalog>
+  <allowRunScriptPermission>false</allowRunScriptPermission>
+  <allowRunScriptEdit>false</allowRunScriptEdit>
+</scriptler>
