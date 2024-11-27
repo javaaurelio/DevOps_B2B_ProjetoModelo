@@ -202,13 +202,13 @@ pipeline {
 			    
 			    echo &apos;Set comment...&apos;
 			    sshagent([&apos;login_fabio&apos;]) {
-                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos; sed -i \&quot;s/&lt;ConfDescription&gt;.*&lt;\\/ConfDescription&gt;/&lt;ConfDescription&gt;Deploy ${params.Versao} git &lt;\\/ConfDescription&gt;/g\&quot; /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &apos; &quot;
+                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos; sed -i \&quot;s/&lt;ConfDescription&gt;.*&lt;\\/ConfDescription&gt;/&lt;ConfDescription&gt;Deploy ${params.Version} git &lt;\\/ConfDescription&gt;/g\&quot; /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &apos; &quot;
 			    }
 			    sshagent([&apos;login_fabio&apos;]) {
-                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos; sed -i \&quot;s/&lt;COMMENTS&gt;.*&lt;\\/COMMENTS&gt;/&lt;COMMENTS&gt; Deploy ${params.Versao} git &lt;\\/COMMENTS&gt;/g\&quot; /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &apos; &quot;
+                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos; sed -i \&quot;s/&lt;COMMENTS&gt;.*&lt;\\/COMMENTS&gt;/&lt;COMMENTS&gt; Deploy ${params.Version} git &lt;\\/COMMENTS&gt;/g\&quot; /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &apos; &quot;
 			    }
 			    sshagent([&apos;login_fabio&apos;]) {
-                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos; sed -i \&quot;s/&lt;description&gt;.*&lt;\\/description&gt;/&lt;description&gt;Deploy ${params.Versao} git &lt;\\/description&gt;/g\&quot; /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &apos; &quot;
+                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos; sed -i \&quot;s/&lt;description&gt;.*&lt;\\/description&gt;/&lt;description&gt;Deploy ${params.Version} git &lt;\\/description&gt;/g\&quot; /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &apos; &quot;
 			    }
 				echo &apos;Set comment... - Success&apos;
             }
@@ -289,7 +289,7 @@ pipeline {
             			        echo &quot;Saida : ${base64Properties}&quot;
             			
             			        retorno = sh(returnStdout: true, 
-                                   script:&quot;curl -s -i -X POST -H &apos;Content-Type: application/json&apos; -H &apos;Accept: application/json&apos; -H &apos;Authorization: ${configMapB2B.B2B_REST.AUTH}&apos; -d &apos;{ \&quot;propertyFileContent\&quot;: \&quot; &quot; +  base64Properties + &quot;\&quot;, \&quot;propertyFilePrefix\&quot;:\&quot;${params.SiglaProjeto}\&quot; , \&quot;description\&quot;:\&quot;Tag: ${params.Versao}\&quot;}&apos;   http://${configMapB2B.B2B_REST.URL}/B2BAPIs/svc/propertyfiles/&quot;)
+                                   script:&quot;curl -s -i -X POST -H &apos;Content-Type: application/json&apos; -H &apos;Accept: application/json&apos; -H &apos;Authorization: ${configMapB2B.B2B_REST.AUTH}&apos; -d &apos;{ \&quot;propertyFileContent\&quot;: \&quot; &quot; +  base64Properties + &quot;\&quot;, \&quot;propertyFilePrefix\&quot;:\&quot;${params.SiglaProjeto}\&quot; , \&quot;description\&quot;:\&quot;Tag: ${params.Version}\&quot;}&apos;   http://${configMapB2B.B2B_REST.URL}/B2BAPIs/svc/propertyfiles/&quot;)
             			       status_code = retorno.trim()
             		      	   echo &quot;HTTP Response: ${status_code}&quot;
             				} else {            				    
