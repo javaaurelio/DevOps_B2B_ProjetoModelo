@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SI_RESOURCES xmlns="http://www.stercomm.com/SI/SI_IE_Resources" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-GISVersion="6100" resourceTag="_siglaProjeto_" FrameworkVersion="2">
+<SI_RESOURCES xmlns="http://www.stercomm.com/SI/SI_IE_Resources" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+GISVersion="6100" resourceTag="_abbreviationProject_" FrameworkVersion="2">
    <BPDEFS>
       <BPDEF>
          <LangResource>SIB64ENCODEPHByb2Nlc3MgbmFtZT0iUHJvamV0b19BX0JQTW9kZWxvIj4NCjxzZXF1ZW5jZSBuYW1lPSJpbmljaW8iPg0KPGFzc2lnbiBuYW1lPSJ0aW1lc3RhbXAiIHRvPSJ0aW1lc3RhbXAiIGZyb209InRpbWVzdGFtcCgpIi8+DQo8YXNzaWduIG5hbWU9Ikp1c3RTb21lSUQiIHRvPSJKdXN0U29tZUlEIiBmcm9tPSJnZXRVbmlxdWVJRCgpIi8+DQo8YXNzaWduIG5hbWU9Im15RW5jb2RlZHN0cmluZyIgdG89Im15RW5jb2RlZHN0cmluZyIgZnJvbT0idXJsRW5jb2RlKCd0ZXN0IFN0cmluZycpIi8+DQo8YXNzaWduIG5hbWU9Im5vdyIgdG89Im5vdyIgZnJvbT0ibm93KCkiLz4NCjwvc2VxdWVuY2U+DQo8L3Byb2Nlc3M+</LangResource>
          <ConfigResource>
-            <ConfDescription>_comentarioBpProjeto_</ConfDescription>
-            <ConfProcessName>_siglaProjeto__BP_Modelo</ConfProcessName>
+            <ConfDescription>_BpProjectcomment_</ConfDescription>
+            <ConfProcessName>_abbreviationProject__BPTemplate</ConfProcessName>
             <ConfWFDID>20888</ConfWFDID>
             <ConfWFDVersion>1</ConfWFDVersion>
             <OBJECT_VERSION>1</OBJECT_VERSION>
@@ -29,7 +29,7 @@ GISVersion="6100" resourceTag="_siglaProjeto_" FrameworkVersion="2">
             <ConfFirstNotifyInterval>-1</ConfFirstNotifyInterval>
             <ConfSecondNotifyInterval>-1</ConfSecondNotifyInterval>
             <ConfEventLevel>2</ConfEventLevel>
-            <ConfCategory>_siglaProjeto_</ConfCategory>
+            <ConfCategory>_abbreviationProject_</ConfCategory>
             <ConfPreferredNode />
             <ConfMandatoryNode />
             <ConfRoleNode />

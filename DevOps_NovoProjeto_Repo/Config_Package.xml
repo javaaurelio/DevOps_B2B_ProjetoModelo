@@ -1,0 +1,298 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1436.vfa_244484591f">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83">
+      <jobProperties/>
+      <triggers/>
+      <parameters>
+        <string>comment</string>
+      </parameters>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+    <org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction plugin="workflow-multibranch@795.ve0cb_1f45ca_9a_">
+      <jobPropertyDescriptors>
+        <string>hudson.model.ParametersDefinitionProperty</string>
+      </jobPropertyDescriptors>
+    </org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction>
+  </actions>
+  <description>Package: It is the process of packaging the artifact with all its dependencies into a format that can be easily distributed and deployed.&#xd;
+</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>4</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+      <abortPrevious>false</abortPrevious>
+    </org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>comment</name>
+          <description>Comment of Package</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.8.4">
+          <name>Environment</name>
+          <description>Select environment.</description>
+          <randomName>choice-parameter-86214768720533</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.ScriptlerScript">
+            <scriptlerBuilder plugin="scriptler@376.v152edd95b_ca_f">
+              <builderId>active-choices</builderId>
+              <scriptId>EnvironmentB2B.groovy</scriptId>
+              <propagateParams>false</propagateParams>
+              <parameters/>
+            </scriptlerBuilder>
+            <isSandboxed>true</isSandboxed>
+          </script>
+          <projectName>NOVA3_Package</projectName>
+          <projectFullName>NOVA3_Package</projectFullName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.8.4">
+          <name>Cluster</name>
+          <description>Resource Tag source Cluster.</description>
+          <randomName>choice-parameter-86214768975467</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.ScriptlerScript">
+            <scriptlerBuilder plugin="scriptler@376.v152edd95b_ca_f">
+              <builderId>active-choices</builderId>
+              <scriptId>ClusterB2B.groovy</scriptId>
+              <propagateParams>false</propagateParams>
+              <parameters>
+                <org.jenkinsci.plugins.scriptler.config.Parameter>
+                  <name>Environment</name>
+                  <value>$Environment</value>
+                </org.jenkinsci.plugins.scriptler.config.Parameter>
+              </parameters>
+            </scriptlerBuilder>
+            <isSandboxed>true</isSandboxed>
+          </script>
+          <projectName>NOVA3_Package</projectName>
+          <projectFullName>NOVA3_Package</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>Environment</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@3990.vd281dd77a_388">
+    <script>// Package
+def URL = &quot;_gitproject_&quot;
+def DIR = &quot;Projeto__abbreviationProject_&quot;
+def TAG = &quot;_abbreviationProject_&quot;
+def configMapB2B = null
+
+import groovy.json.JsonSlurper
+
+properties([
+  parameters([
+    [
+      $class: &apos;ChoiceParameter&apos;,
+      choiceType: &apos;PT_SINGLE_SELECT&apos;,
+      name: &apos;Environment&apos;,
+      description: &apos;Select environment.&apos;,
+      script: [
+        $class: &apos;ScriptlerScript&apos;,
+        scriptlerScriptId:&apos;EnvironmentB2B.groovy&apos;
+      ]
+    ],
+    [
+      $class: &apos;CascadeChoiceParameter&apos;,
+      choiceType: &apos;PT_SINGLE_SELECT&apos;,
+      name: &apos;Cluster&apos;,
+      referencedParameters: &apos;Environment&apos;,
+      description: &apos;Resource Tag source Cluster.&apos;,
+      script: [
+        $class: &apos;ScriptlerScript&apos;,
+        scriptlerScriptId:&apos;ClusterB2B.groovy&apos;,
+        parameters: [
+          [name:&apos;Environment&apos;, value: &apos;$Environment&apos;]
+        ]
+      ]
+   ]
+ ])
+])
+
+
+pipeline {
+    agent any
+    
+    
+    parameters {
+       
+		string(name: &apos;comment&apos;, 
+               defaultValue: &apos;&apos;, 
+               description: &apos;Comment of Package&apos;)
+			   
+		
+    }   
+
+    stages {
+		
+		stage(&apos;Checkout&apos;) {
+				
+		  steps {
+		      
+		    script { 
+	            if ( (params.comment).length() &lt; 3) {
+                    currentBuild.displayName = &quot;ERROR: Short comment. &quot;
+                    error &apos;Short comment.&apos;
+                } 
+        
+                 def EnvironmentB2B = load &quot;${JENKINS_HOME}/scriptler/scripts/EnvironmentB2B.Config.groovy&quot;
+				 configMapB2B = EnvironmentB2B.getConfig(&quot;${params.Cluster}&quot;)
+            }   
+		      
+			script{
+			     status_code = sh(script: &quot;rm -fR ${DIR}; git clone ${URL} ${DIR}&quot;, returnStdout: true).trim()
+			 	 echo &quot;Checkout Response: ${status_code}&quot;
+			}
+		  }
+		}
+		
+	    stage(&apos;Extract Resource Tag - B2B&apos;) {
+				
+		    steps {
+			    script{
+                    status_code = sh(returnStdout: true, 
+                           script:&quot;curl -X GET -D -  -H &apos;Authorization: ${configMapB2B.B2B_DEVOPS.AUTH}&apos; ${configMapB2B.B2B_DEVOPS.URL}/v1/export/tag?nomeTag=${TAG} -o ${DIR}/Export_${TAG}.xml&quot;
+        			    ).trim()
+                      
+                     echo &quot;Return: ${status_code}&quot;
+                     if ((status_code.contains(&apos;HTTP/1.1 200&apos;))) {
+        				echo &quot;Successfully extracted. &quot;
+                    } else if (status_code.contains(&apos;HTTP/1.1 404&apos;)) {
+                        error(&apos;Resource Tag not found.&apos;)
+                    } else if (status_code.contains(&apos;HTTP/1.1 401&apos;)) {
+                        error(&apos;Unauthorized.&apos;)
+                    } else {
+                         error(&apos;Error extracting Resource Tag&apos;)
+                    }
+		    	}
+		    }
+		}
+		
+		stage(&apos;Extract Properties - B2B&apos;) {
+				
+		  steps {
+		      script {
+                    
+                    try {
+                       status_code = sh(returnStdout: true, 
+                                 script:&quot;curl -X GET -D - -H &apos;Accept: application/json&apos; -H &apos;Authorization: ${configMapB2B.B2B_REST.AUTH}&apos; http://${configMapB2B.B2B_REST.URL}/B2BAPIs/svc/propertyfiles/${TAG}/property -o ${DIR}/${TAG}_SAIDA.json&quot;).trim()
+                       
+                       echo &quot;HTTP Response: ${status_code}&quot;
+        			   if ((status_code.contains(&apos;HTTP/1.1 200&apos;))) {
+        				   	echo &quot;Extracted Properties Successfully&quot;
+        				   	
+            				def inputFile = new File(env.getProperty(&quot;WORKSPACE&quot;)+&quot;/${DIR}/${TAG}_SAIDA.json&quot;)
+                            def InputJSON = new JsonSlurper().parseText(inputFile.text)
+                            
+                            def propsDestino = new Properties()
+                            InputJSON.each{ 
+                                //println it.propertyKey + &quot;=&quot; + it.propertyValue 
+                                propsDestino.setProperty(it.propertyKey, it.propertyValue )
+                            }
+                            
+                            def fileOoutput = new FileOutputStream(env.getProperty(&quot;WORKSPACE&quot;)+&quot;/${DIR}/${TAG}.properties&quot;)
+                            propsDestino.store(fileOoutput, &quot;Created by Jenkins - ${TAG} &quot;)
+    						fileOoutput.close();
+        				   	
+        				} else if (status_code.contains(&apos;HTTP/1.1 404&apos;)) {
+        				    echo &quot;Properties Not Found&quot;
+        				} else {
+        				    error(&quot;Error getting Properties&quot;)
+        				}
+                    } catch (err) {
+                        print(&apos;Error getting Properties: &apos; + err.toString() )
+                        error &quot; Error getting Properties&quot;
+                    }
+                    
+                }
+                
+                script {
+                    status_code = sh(script: &quot;rm -f ./${DIR}/${TAG}_SAIDA.json&quot;, returnStdout: true).trim()
+			 	    echo &quot;Execute Retorno: ${status_code}&quot;
+			     }
+                
+            }
+		}
+		
+		
+	stage(&apos;Update - GIT&apos;) {
+				
+		  steps {
+			script{
+			  cmd = &quot;&quot;&quot;
+			    cd ${DIR}
+			    git add -A			 
+			    git commit -m &quot;${comment}&quot; --author=&quot;jenkins-local &lt;jenkins-local@local.com&gt;&quot;
+			  &quot;&quot;&quot;
+              status_code = sh(script: cmd, returnStdout: true).trim()
+			  echo &quot;Execute Retorno: ${status_code}&quot;
+			}
+		  }
+		}
+                   
+        stage(&apos;Push - GIT&apos;) {
+				
+		  steps {
+			script{
+			  cmd = &quot;&quot;&quot;
+    			  cd ${DIR}	  
+    			  git push ${URL}
+			  &quot;&quot;&quot;
+              status_code = sh(script: cmd, returnStdout: true).trim()
+			 echo &quot;Execute Retorno: ${status_code}&quot;
+			}
+		  }
+		}
+		
+		stage(&apos;New Tag - GIT&apos;) {
+				
+		  steps {
+			script{
+			  cmd = &quot;&quot;&quot;
+        			  cd ${DIR}			  
+        			 
+        			  git tag -a \$(  echo \$(git tag -l --sort=-creatordate | head -n 1 | grep . || echo &apos;v1.-1&apos;) | awk -F &quot;.&quot; &apos;{print \$1 &quot;.&quot; \$2+1 }&apos;) -m &quot;${comment}&quot;
+        			     
+        			  git push --tag
+			     &quot;&quot;&quot;
+                 status_code = sh(script: cmd, returnStdout: true).trim()                              
+			 	 echo &quot;Execute Retorno: ${status_code}&quot;
+			}
+		 
+			script{
+
+			    cmd = &quot;&quot;&quot;
+			        cd ${DIR}	
+			        git tag -l --sort=-creatordate | head -n 1
+			    &quot;&quot;&quot;
+                status_code = sh(script: cmd, returnStdout: true).trim()
+                currentBuild.displayName = &quot;Tag: ${status_code}&quot;
+                echo &quot;Execute Retorno: ${status_code}&quot;
+			}
+		  }
+		}
+	}
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

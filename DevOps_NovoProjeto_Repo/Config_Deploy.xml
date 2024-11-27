@@ -1,0 +1,370 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1436.vfa_244484591f">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83">
+      <jobProperties/>
+      <triggers/>
+      <parameters>
+        <string>Version</string>
+        <string>PassphraseB2B</string>
+      </parameters>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+    <org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction plugin="workflow-multibranch@795.ve0cb_1f45ca_9a_">
+      <jobPropertyDescriptors>
+        <string>hudson.model.ParametersDefinitionProperty</string>
+      </jobPropertyDescriptors>
+    </org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction>
+  </actions>
+  <description>Deploy - It is the process of installing and configuring the new version of software in a target environment</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.10.0">
+          <name>Version</name>
+          <uuid>422003ad-d99d-43f4-bc50-b36c643a0fe5</uuid>
+          <type>PT_TAG</type>
+          <branch></branch>
+          <tagFilter>*</tagFilter>
+          <branchFilter>.*</branchFilter>
+          <sortMode>DESCENDING_SMART</sortMode>
+          <defaultValue>v1.0</defaultValue>
+          <selectedValue>TOP</selectedValue>
+          <quickFilterEnabled>false</quickFilterEnabled>
+          <listSize>5</listSize>
+          <requiredParameter>false</requiredParameter>
+        </net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition>
+        <hudson.model.PasswordParameterDefinition>
+          <name>PassphraseB2B</name>
+          <description>Passphrase - Import Resorcer Tag B2B</description>
+          <defaultValue>{AQAAABAAAAAQcGBsyHn6DkrDA9GUlUpG/cK/Do2Io/oVGz9g/TRxco0=}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.8.4">
+          <name>Environment</name>
+          <description>Select environment to destination.</description>
+          <randomName>choice-parameter-84778800677079</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.ScriptlerScript">
+            <scriptlerBuilder plugin="scriptler@376.v152edd95b_ca_f">
+              <builderId>active-choices</builderId>
+              <scriptId>EnvironmentB2B.groovy</scriptId>
+              <propagateParams>false</propagateParams>
+              <parameters/>
+            </scriptlerBuilder>
+            <isSandboxed>true</isSandboxed>
+          </script>
+          <projectName>NOVA3_Deploy</projectName>
+          <projectFullName>NOVA3_Deploy</projectFullName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.8.4">
+          <name>Cluster</name>
+          <description>Deployment destination.</description>
+          <randomName>choice-parameter-84778800947461</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.ScriptlerScript">
+            <scriptlerBuilder plugin="scriptler@376.v152edd95b_ca_f">
+              <builderId>active-choices</builderId>
+              <scriptId>ClusterB2B.groovy</scriptId>
+              <propagateParams>false</propagateParams>
+              <parameters>
+                <org.jenkinsci.plugins.scriptler.config.Parameter>
+                  <name>Environment</name>
+                  <value>$Environment</value>
+                </org.jenkinsci.plugins.scriptler.config.Parameter>
+              </parameters>
+            </scriptlerBuilder>
+            <isSandboxed>true</isSandboxed>
+          </script>
+          <projectName>NOVA3_Deploy</projectName>
+          <projectFullName>NOVA3_Deploy</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>Environment</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@3990.vd281dd77a_388">
+    <script>//Deploy Version
+def URL = &quot;_gitproject_&quot;
+def DIR = &quot;Projeto__abbreviationProject_&quot;
+def TAG = &quot;_abbreviationProject_&quot;
+
+def configMapB2B = null
+
+properties([
+  parameters([
+    [
+      $class: &apos;ChoiceParameter&apos;,
+      choiceType: &apos;PT_SINGLE_SELECT&apos;,
+      name: &apos;Environment&apos;,
+      description: &apos;Select environment to destination.&apos;,
+      script: [
+        $class: &apos;ScriptlerScript&apos;,
+        scriptlerScriptId:&apos;EnvironmentB2B.groovy&apos;
+      ]
+    ],
+    [
+      $class: &apos;CascadeChoiceParameter&apos;,
+      choiceType: &apos;PT_SINGLE_SELECT&apos;,
+      name: &apos;Cluster&apos;,
+      referencedParameters: &apos;Environment&apos;,
+      description: &apos;Deployment destination.&apos;,
+      script: [
+        $class: &apos;ScriptlerScript&apos;,
+        scriptlerScriptId:&apos;ClusterB2B.groovy&apos;,
+        parameters: [
+          [name:&apos;Environment&apos;, value: &apos;$Environment&apos;]
+        ]
+      ]
+   ]
+ ])
+])
+
+pipeline {
+    
+   
+    agent any
+    options {
+      timeout(time: 10, unit: &apos;MINUTES&apos;) 
+    }
+    environment {
+        unique_Id = UUID.randomUUID().toString()
+    }
+    parameters {
+        gitParameter (name: &apos;Version&apos;,
+                     type: &apos;PT_TAG&apos;,
+                     defaultValue: &apos;v1.0&apos;,
+                     sortMode: &apos;DESCENDING_SMART&apos;)
+                     
+        password(name: &apos;PassphraseB2B&apos;, 
+               defaultValue: &apos;123456&apos;, 
+               description: &apos;Passphrase - Import Resorcer Tag B2B&apos;)
+    }
+    stages {
+        stage(&apos;Checkout&apos;) {
+
+            steps {
+                
+                script{
+                    
+                    echo &quot;EnvironmentB2B recuperar: ${params.Cluster}&quot;
+                    def EnvironmentB2B = load &quot;${JENKINS_HOME}/scriptler/scripts/EnvironmentB2B.Config.groovy&quot;
+    				configMapB2B = EnvironmentB2B.getConfig(&quot;${params.Cluster}&quot;)   				
+    				 
+                }
+                
+                checkout([$class: &apos;GitSCM&apos;,
+				branches: [[name: &quot;${params.Version}&quot;]],
+				//branches: [[name: &quot;*/master&quot;]],
+				doGenerateSubmoduleConfigurations: false,
+				extensions: [],
+				gitTool: &apos;Default&apos;,
+				submoduleCfg: [],
+				userRemoteConfigs: [[url: &quot;${URL}&quot;]]])
+            }
+        }
+		stage(&apos;Build&apos;) {
+            steps {
+                
+                echo &apos;Build Properties...&apos;
+			    atualizarConteudoProperties(&quot;${TAG}&quot;, configMapB2B.PROPERTIES_FILE.FILE)
+                
+                echo &quot;Build dir temp... ${configMapB2B.B2B_HOME_INSTALL.HOST}&quot;
+			    sshagent([&apos;login_fabio&apos;]) {
+                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos;mkdir -p /tmp/jenkins/$BUILD_TAG &apos; &quot;
+			    }
+            
+			    echo &quot;Send file to server... ${configMapB2B.B2B_HOME_INSTALL.HOST}&quot;
+			    sshagent([&apos;login_fabio&apos;]) {
+                    sh &quot;scp Export_${TAG}.xml ${configMapB2B.B2B_HOME_INSTALL.USER}@${configMapB2B.B2B_HOME_INSTALL.HOST}:/tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &quot;
+			    }
+			    
+			    sshagent([&apos;login_fabio&apos;]) {
+                    sh &quot;scp ${TAG}.properties_CUSTOMIZED ${configMapB2B.B2B_HOME_INSTALL.USER}@${configMapB2B.B2B_HOME_INSTALL.HOST}:/tmp/jenkins/$BUILD_TAG/${TAG}.properties &quot;
+			    }				
+				echo &quot;Send file to server... ${configMapB2B.B2B_HOME_INSTALL.HOST} - Success&quot;
+			    
+			    echo &apos;Set comment...&apos;
+			    sshagent([&apos;login_fabio&apos;]) {
+                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos; sed -i \&quot;s/&lt;ConfDescription&gt;.*&lt;\\/ConfDescription&gt;/&lt;ConfDescription&gt;Deploy ${params.Versao} git &lt;\\/ConfDescription&gt;/g\&quot; /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &apos; &quot;
+			    }
+			    sshagent([&apos;login_fabio&apos;]) {
+                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos; sed -i \&quot;s/&lt;COMMENTS&gt;.*&lt;\\/COMMENTS&gt;/&lt;COMMENTS&gt; Deploy ${params.Versao} git &lt;\\/COMMENTS&gt;/g\&quot; /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &apos; &quot;
+			    }
+			    sshagent([&apos;login_fabio&apos;]) {
+                    sh &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos; sed -i \&quot;s/&lt;description&gt;.*&lt;\\/description&gt;/&lt;description&gt;Deploy ${params.Versao} git &lt;\\/description&gt;/g\&quot; /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml &apos; &quot;
+			    }
+				echo &apos;Set comment... - Success&apos;
+            }
+        }
+    
+    stage(&apos;Deploy - B2B&apos;) {
+            steps {
+                sshagent([&apos;login_fabio&apos;]) {
+                    script {
+                         currentBuild.displayName = &quot;Version: ${params.Version}&quot;                        
+                        try {
+                            maskPasswords(varPasswordPairs: [[password: &quot;${PassphraseB2B}&quot;]]){
+                               sh(&quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos;${configMapB2B.B2B_HOME_INSTALL.DIR}/tp_import/import.sh -numberOfThreads 5 -update -input /tmp/jenkins/$BUILD_TAG/Export_${TAG}.xml -passphrase ${PassphraseB2B} -report /tmp/jenkins/$BUILD_TAG/SAIDA.report &gt; /tmp/jenkins/$BUILD_TAG/SAIDA_COMMANDO.log | exit 0; &apos;&quot;)
+                            }           
+                          
+                        } catch (err) {
+                            print(&apos;ERROR: &apos; + err.toString() )
+                            error &apos;ERROR to run script B2Bi import.sh &apos;
+                        }
+                    }
+                }
+                
+                sshagent([&apos;login_fabio&apos;]) {
+                    script {
+                        
+                        try {
+                           retorno = sh(returnStdout: true, script:&quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos;cat /tmp/jenkins/$BUILD_TAG/SAIDA_COMMANDO.log&apos; &quot;)
+                           
+                           if (!retorno.contains(&quot;&apos;0&apos;&quot;) ) {
+                                unstable(message: &quot;Failed read deploy: ${retorno}&quot;)
+                            }
+                    
+                        } catch (err) {
+                            print(&apos;ERROR: &apos; + err.toString() )
+                            error &apos;ERROR Failed read deploy &apos;
+                        }
+                    }
+                }
+                
+    			sshagent([&apos;login_fabio&apos;]) {
+                    script {
+                        retornoSh = sh(returnStdout: true, script: &quot;ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} &apos;cat /tmp/jenkins/$BUILD_TAG/SAIDA.report&apos; &quot;).trim()
+                        echo &quot;Return: ${retornoSh}&quot;
+			       } 
+    			}			    
+            }            
+        }
+       
+        stage(&apos;Deploy Properties - B2B&apos;) {
+            steps {
+
+                sshagent([&apos;login_fabio&apos;]) {
+                    script {
+                        
+                        try {
+							print(&quot;Check Properties&quot;)
+                           retorno = sh(returnStdout: true, 
+                           script:&quot;curl -s -i -X GET -H &apos;Accept: application/json&apos; -H &apos;Authorization: ${configMapB2B.B2B_REST.AUTH}&apos; ${configMapB2B.B2B_REST.URL}/B2BAPIs/svc/propertyfiles/${TAG}/property&quot;)
+                           status_code = retorno.trim()
+			               echo &quot;HTTP response: ${status_code} &quot;
+            			  
+            			  if ((status_code.contains(&apos;HTTP/1.1 200&apos;))) {
+							    print(&quot;Properties found!&quot;)
+            				   	echo &quot;Update Properties &quot;            				   	
+            				   	base64Properties = sh(returnStdout: true,   script:&quot;cat ${TAG}.properties_CUSTOMIZED | base64&quot;)            			
+            			       echo &quot;Return : ${base64Properties}&quot;            			
+            			       retorno = sh(returnStdout: true, 
+                                   script:&quot;curl -s -i -X PUT   -H &apos;Content-Type: application/json&apos; -H &apos;Accept: application/json&apos; -H &apos;Authorization: ${configMapB2B.B2B_REST.AUTH}&apos; -d &apos;{ \&quot;propertyFileContent\&quot;: \&quot; &quot; +  base64Properties + &quot;\&quot;, \&quot;replaceExistingPropertySet\&quot;:true, \&quot;propertyFilePrefix\&quot;:\&quot;${TAG}\&quot; , \&quot;description\&quot;:\&quot;Tag: ${params.Version}\&quot;}&apos;   http://${configMapB2B.B2B_REST.URL}/B2BAPIs/svc/propertyfiles/${TAG}&quot;)
+            			       status_code = retorno.trim()
+            		      	   echo &quot;HTTP Response:${status_code}&quot;
+            			       print(&quot;Update Properties Success !&quot;)
+							   
+            				} else if (status_code.contains(&apos;HTTP/1.1 404&apos;)) {
+            				    
+            				    echo &quot;Propeties not found&quot;   
+            				    
+            			        base64Properties = sh(returnStdout: true,   script:&quot;cat ${SIGLA}.properties_CUSTOMIZED | base64&quot;)            			
+            			        echo &quot;Saida : ${base64Properties}&quot;
+            			
+            			        retorno = sh(returnStdout: true, 
+                                   script:&quot;curl -s -i -X POST -H &apos;Content-Type: application/json&apos; -H &apos;Accept: application/json&apos; -H &apos;Authorization: ${configMapB2B.B2B_REST.AUTH}&apos; -d &apos;{ \&quot;propertyFileContent\&quot;: \&quot; &quot; +  base64Properties + &quot;\&quot;, \&quot;propertyFilePrefix\&quot;:\&quot;${params.SiglaProjeto}\&quot; , \&quot;description\&quot;:\&quot;Tag: ${params.Versao}\&quot;}&apos;   http://${configMapB2B.B2B_REST.URL}/B2BAPIs/svc/propertyfiles/&quot;)
+            			       status_code = retorno.trim()
+            		      	   echo &quot;HTTP Response: ${status_code}&quot;
+            				} else {            				    
+            				    error(&apos;Error to deploys properties&apos;)
+            				}
+            		
+                        } catch (err) {
+                            print(&apos;ERROR: &apos; + err.toString() )
+                            error &apos;Error to deploys properties &apos;
+                        }
+                    }
+                }
+            }            
+        }
+        
+        stage(&apos;Run CacheRefreshService&apos;) {
+            steps {
+                
+                sshagent([&apos;login_fabio&apos;]) {
+                    script {
+                        
+                        try {
+                           retorno = sh(returnStdout: true, 
+                           script:&quot;curl -s -i -X POST -H &apos;Authorization: ${configMapB2B.B2B_DEVOPS.AUTH}&apos; ${configMapB2B.B2B_DEVOPS.URL}/atualizarproperties?nomearquivo=${TAG}&quot;)
+                           
+                           status_code = retorno.trim()
+			               echo &quot;HTTP Return: ${status_code}&quot;
+            			  
+            			  if ((status_code.contains(&apos;HTTP/1.1 200&apos;))) {
+            				   	echo &quot;CacheRefreshService - Success&quot;  			
+            			            			    
+            			  } else if ((status_code.contains(&apos;HTTP/1.1 404&apos;))) {
+            				   	echo &quot;CacheRefreshService not found&quot;  	
+								error &apos;CacheRefreshService not found&apos;								
+            			            			    
+            			  }	else {
+            				    error(&apos;Error Run CacheRefreshService Http&apos;)
+            			  }
+                        } catch (err) {
+                           print(&apos;ERROR: &apos; + err.toString() )
+                            error(&apos;Error Run CacheRefreshService Http&apos;)
+                        }
+                       
+                    }
+                }
+            }  
+            
+        }
+    }
+}
+
+
+void atualizarConteudoProperties(String sigla, String pathProperties) {
+    print(&quot;Exec method: atualizarConteudoProperties&quot;)
+    
+    def propsOrigem = new Properties()
+    File propsFileOrigem = new File(pathProperties)
+    propsOrigem.load(propsFileOrigem.newDataInputStream())
+    
+    def propsDestino = new Properties()  
+    File propsFileDestino = new File(env.getProperty(&quot;WORKSPACE&quot;)+&apos;/&apos;+sigla+&apos;.properties&apos;)
+    propsDestino.load(propsFileDestino.newDataInputStream())
+    
+    propsDestino.each { key, value -&gt;
+        if( &quot;${value}&quot;.startsWith(&quot;_&quot;) ) {
+            propsDestino.setProperty(&quot;${key}&quot;, propsOrigem.getProperty(&quot;${value}&quot;) )
+        }
+    }
+    def fileOoutput = new FileOutputStream(env.getProperty(&quot;WORKSPACE&quot;)+&apos;/&apos;+sigla+&apos;.properties_CUSTOMIZED&apos;)
+                
+    propsDestino.store(fileOoutput, &quot;Deploy Tag: &quot; + env.getProperty(&quot;Version&quot;) + &quot; - &quot; + env.getProperty(&quot;BUILD_TAG&quot;))
+    
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
