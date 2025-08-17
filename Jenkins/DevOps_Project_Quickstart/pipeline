@@ -1,0 +1,332 @@
+import groovy.json.JsonSlurperClassic 
+
+def URL_REPO_PROJETO_MODELO = "${JENKINS_HOME}/git/DevOps_B2B_ProjetoModelo/local_remote.git"
+def REPO_PRJ =  "${JENKINS_HOME}/git/${params.abbreviationProject}_Repo/${params.abbreviationProject}_Repo_config.git/" 
+def USUARIO_SENHA_JENKINS = "aurelio:aurelio@123"
+def HOST_PORT_JENKINS = "localhost:8080"
+def configMapB2B = null
+
+
+properties([
+  parameters([
+    [
+      $class: 'ChoiceParameter',
+      choiceType: 'PT_SINGLE_SELECT',
+      name: 'Environment',
+	  description: 'Select environment.',
+      script: [
+        $class: 'ScriptlerScript',
+        scriptlerScriptId:'EnvironmentB2B.groovy'
+      ]
+    ],
+    [
+      $class: 'CascadeChoiceParameter',
+      choiceType: 'PT_SINGLE_SELECT',
+      name: 'Cluster',
+      referencedParameters: 'Environment',
+	  description: 'Cluster that will receive the components',
+      script: [
+        $class: 'ScriptlerScript',
+        scriptlerScriptId:'ClusterB2B.groovy',
+        parameters: [
+          [name:'Environment', value: '$Environment']
+        ]
+      ]
+   ]
+ ])
+])
+
+pipeline {    
+   
+    agent any
+    
+    options {
+      timeout(time: 15, unit: 'MINUTES') 
+    }
+    environment {
+        unique_Id = UUID.randomUUID().toString()
+    }
+    parameters {
+gitParameter (name: 'Version',
+                     type: 'PT_TAG',
+                     defaultValue: 'v1.0',
+                     sortMode: 'DESCENDING_SMART',
+					 description: 'Template project version')
+					 
+		string(name: 'abbreviationProject', 
+               defaultValue: '', 
+               description: 'Project name abbreviation')			 
+					 
+                     
+        password(name: 'PassphraseB2B', 
+               defaultValue: '123456', 
+               description: 'Passphrase - Import Resorcer Tag B2B')
+    }
+    stages {
+        stage('Checkout') {
+            
+            steps {
+                
+                 script { 
+                       
+                    if ( (params.abbreviationProject).length() < 3) {
+                        currentBuild.displayName = "ERROR: abbreviationProject is short."
+                    
+                        error 'abbreviationProject is short.'
+                    } 
+                    
+        
+                    def EnvironmentB2B = load "${JENKINS_HOME}/scriptler/scripts/EnvironmentB2B.Config.groovy"
+                    configMapB2B = EnvironmentB2B.getConfig("${params.Cluster}")
+                    echo configMapB2B.B2B_REST.HOST
+                     
+                 }
+                
+                checkout([$class: 'GitSCM',
+				//branches: [[name: "*/master"]],
+				branches: [[name: "${params.Version}"]],
+				doGenerateSubmoduleConfigurations: false,
+				extensions: [],
+				gitTool: 'Default',
+				submoduleCfg: [],
+				userRemoteConfigs: [[url: "${URL_REPO_PROJETO_MODELO}"]]])
+            }
+        }
+		
+		 stage('Creating GIT Repository') {
+            steps {
+			    echo 'Creating GIT Repository'
+				
+				sh "    rm -Rf ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo "	
+				sh "    mkdir -p ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo "
+				sh "	cd ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo; git init --bare ${params.abbreviationProject}_Repo_config.git"
+				sh "	cd ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo; git clone ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo/${params.abbreviationProject}_Repo_config.git/ ${params.abbreviationProject} "
+				
+			    sh "    cp -R ${JENKINS_HOME}/workspace/${JOB_NAME}/Export_TAG_ProjetoModelo.xml ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo/${params.abbreviationProject}/Export_${params.abbreviationProject}.xml  "
+			    sh "    cp -R ${JENKINS_HOME}/workspace/${JOB_NAME}/PROJETO.properties ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo/${params.abbreviationProject}/${params.abbreviationProject}.properties  "
+			    
+				sh "	cd ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo/${params.abbreviationProject}; git config --global user.email 'jenkins@local.com';  git config --global user.name 'Jenkins Local'  "
+				
+				sh "	cd ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo/${params.abbreviationProject}; git add . ; git commit -m \"Criado via Jenkins\" "
+				sh "	cd ${JENKINS_HOME}/git/${params.abbreviationProject}_Repo/${params.abbreviationProject}; git push origin master "
+				    	    	
+            }
+        }
+		
+		stage('File configuration - B2B') {
+            steps {
+                                
+					echo 'MKDIR temp...'
+					sshagent(['login_fabio']) {
+						sh "ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} 'mkdir -p /tmp/jenkins/$BUILD_TAG ' "
+					}
+				
+					echo 'Sending file to server...'
+					sshagent(['login_fabio']) {
+						sh "scp Export_TAG_ProjetoModelo.xml ${configMapB2B.B2B_HOME_INSTALL.USER}@${configMapB2B.B2B_HOME_INSTALL.HOST}:/tmp/jenkins/$BUILD_TAG/Export_${params.abbreviationProject}.xml "
+					}
+                
+               
+               script { 
+                   
+                    currentBuild.displayName = "Proj: ${params.abbreviationProject} - Tag Template: ${params.Version}"
+                
+					if ( (params.abbreviationProject).length() < 3) {
+					
+						error 'The abbreviationProject is invalid. '
+					}
+                
+					sshagent(['login_fabio']) {
+						sh "ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} ' sed -i \"s/_abbreviationProject_/${params.abbreviationProject}/g\" /tmp/jenkins/$BUILD_TAG/Export_${params.abbreviationProject}.xml ' "
+					}
+					
+					sshagent(['login_fabio']) {
+						sh "ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} ' sed -i \"s/_BpProjectcomment_/v1 - automatically created - can be deleted/g\" /tmp/jenkins/$BUILD_TAG/Export_${params.abbreviationProject}.xml ' "
+					}
+			    
+               }
+			    
+		    }
+        }
+    
+    stage('Deploy Resource Tags - B2B') {
+            steps {
+                sshagent(['login_fabio']) {
+                    script {
+                        
+                        try {
+                            maskPasswords(varPasswordPairs: [[password: "${PassphraseB2B}"]]){
+                               sh("ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} '${configMapB2B.B2B_HOME_INSTALL.DIR}/tp_import/import.sh -resourcetag USETAGININPUTFILE -numberOfThreads 5 -input /tmp/jenkins/$BUILD_TAG/Export_${params.abbreviationProject}.xml -passphrase ${PassphraseB2B} -report /tmp/jenkins/$BUILD_TAG/SAIDA.report > /tmp/jenkins/$BUILD_TAG/SAIDA_COMMANDO.log | exit 0; '")
+                            }            
+                          
+                        } catch (err) {
+                            print('ERROR: ' + err.toString() )
+                            error 'ERROR when running B2Bi import.sh script. '
+                        }
+                    }
+                }
+                
+                sshagent(['login_fabio']) {
+                    script {
+                        
+                        try {
+                           retorno = sh(returnStdout: true, script:"ssh -o StrictHostKeyChecking=no -l ${configMapB2B.B2B_HOME_INSTALL.USER} ${configMapB2B.B2B_HOME_INSTALL.HOST} 'cat /tmp/jenkins/$BUILD_TAG/SAIDA_COMMANDO.log' ")
+                           
+                           if (!retorno.contains("'0'") ) {
+                                unstable("Deploy Resource Tags - B2B ${retorno}")
+                                print("Deploy Resource Tags - B2B ${retorno}")
+                            }
+                    
+                        } catch (err) {
+                            print('ERROR: ' + err.toString() )
+                            error 'ERROR when running read report B2Bi import.sh script. '
+                        }
+                    }
+                }
+                
+                
+                
+            }            
+        }
+        
+        stage('Deploy Properties - B2B') {
+            steps {
+
+                sshagent(['login_fabio']) {
+                    script {
+                        
+                        try {
+						   print("Check Properties")
+                           status_code = sh(returnStdout: true, 
+                           script:"curl -s -i -X GET -H 'Accept: application/json' -H 'Authorization: ${configMapB2B.B2B_REST.AUTH}' http://${configMapB2B.B2B_REST.URL}/B2BAPIs/svc/propertyfiles/${params.abbreviationProject}").trim()
+                           
+                           echo "HTTP Response: ${status_code} "
+            			  
+            			  if ((status_code.contains('HTTP/1.1 200'))) {
+							    print("Properties Found!")
+            				   	echo "Update Properties "
+								
+							   base64Properties = sh(returnStdout: true,   script:"cat PROJETO.properties | base64")
+            			
+            			       retorno = sh(returnStdout: true, 
+                                   script:"curl -s -i -X PUT   -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Authorization: ${configMapB2B.B2B_REST.AUTH}' -d '{ \"propertyFileContent\": \" " + base64Properties + "\", \"replaceExistingPropertySet\":true, \"propertyFilePrefix\":\"${params.abbreviationProject}\" , \"description\":\"Tag: ${params.Versao}\"}'   http://${configMapB2B.B2B_REST.URL}/B2BAPIs/svc/propertyfiles/${params.abbreviationProject}")
+            			       status_code = retorno.trim()
+            		      	   echo "HTTP Response: ${status_code}"
+            			       print("Properties atualizado !")
+							   
+            				} else if (status_code.contains('HTTP/1.1 404')) {
+            				    
+            				    echo "Build Properties"      
+            				    
+            			        base64Properties = sh(returnStdout: true,   script:"cat PROJETO.properties | base64")
+            			
+            			        echo "Return: ${base64Properties}"
+            			
+            			        retorno = sh(returnStdout: true, 
+                                   script:"curl -s -i -X POST -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Authorization: ${configMapB2B.B2B_REST.AUTH}' -d '{ \"propertyFileContent\": \" " +  base64Properties + "\", \"propertyFilePrefix\":\"${params.abbreviationProject}\" , \"description\":\"Tag: ${params.Versao}\"}'   http://${configMapB2B.B2B_REST.URL}/B2BAPIs/svc/propertyfiles/")
+            			       status_code = retorno.trim()
+            		      	   echo "HTTP Response: ${status_code}"
+            				} else {            				    
+            				    error('Error to deploy Properties')
+            				}
+                        } catch (err) {
+                            print('ERROR: ' + err.toString() )
+                            error 'ERRO to run B2Bi import.sh '
+                        }
+                    }
+                }
+            }            
+        }
+        
+        stage('Run CacheRefreshService') {
+            steps {
+                
+                sshagent(['login_fabio']) {
+                    script {
+                        
+                        try {
+                           retorno = sh(returnStdout: true, 
+                           script:"curl -s -i -X POST -H 'Authorization: ${configMapB2B.B2B_DEVOPS.AUTH}' http://${configMapB2B.B2B_DEVOPS.URL}/atualizarproperties?nomearquivo=${params.abbreviationProject}")
+                           
+                           status_code = retorno.trim()		              
+						  
+            			  echo "HTTP Response: ${status_code}"            			  
+            			  if ((status_code.contains('HTTP/1.1 200'))) {
+            				   	echo "CacheRefreshService - Success"  			
+            			            			    
+            			  } else if ((status_code.contains('HTTP/1.1 404'))) {
+            				   	echo "CacheRefreshService not found"  	
+								error 'CacheRefreshService not found'								
+            			            			    
+            			  }	else {
+            				    error('Error Run CacheRefreshService Http')
+            			  }
+                        } catch (err) {
+                            print('ERROR: ' + err.toString() )
+                            error 'Error Run CacheRefreshService'
+                        }
+                       
+                    }
+					
+					
+                }
+            }            
+        }
+        
+        stage('Creating Pipeline Project') {
+            steps {               
+                
+                script {
+						echo 'Creating Pipeline Project'				
+						CRUMBJson = sh(returnStdout: true,   script:"curl -s http://${HOST_PORT_JENKINS}/crumbIssuer/api/json -u ${USUARIO_SENHA_JENKINS} " )
+					
+						def jsonCRUMB = new JsonSlurperClassic().parseText(CRUMBJson)
+						
+						def texto = jsonCRUMB.crumbRequestField + ":"+jsonCRUMB.crumb
+					   
+					    echo 'Update Config_Deploy.xml '	
+						sh " sed -i \"s\\_gitproject_\\${REPO_PRJ}\\g\" Config_Deploy.xml "
+						sh " sed -i \"s\\_abbreviationProject_\\${params.abbreviationProject}\\g\" Config_Deploy.xml "								
+						
+						echo 'Update Config_Deploy.xml - Success'	
+			
+						echo 'Update Config_Package.xml '
+						sh " sed -i  \"s\\_gitproject_\\${REPO_PRJ}\\g\" Config_Package.xml "
+						sh " sed -i  \"s\\_abbreviationProject_\\${params.abbreviationProject}\\g\" Config_Package.xml "			   
+					    echo 'Update Config_Deploy.xml - Success'	
+					   
+					   
+					    echo "Request Creating Pipeline Project: ${params.abbreviationProject}_Deploy"
+						retorno = sh(returnStdout: true, 
+								   script: " curl -s -i -XPOST http://${HOST_PORT_JENKINS}/createItem?name=${params.abbreviationProject}_Deploy -u ${USUARIO_SENHA_JENKINS} --data-binary @Config_Deploy.xml -H \"" + texto + "\" -H \"Content-Type:text/xml\" ")
+						status_code = retorno.trim()
+						echo "HTTP Resonse: ${status_code}"
+								  
+						if ((status_code.contains('HTTP/1.1 200'))) {
+							echo "Request Creating Pipeline Project: ${params.abbreviationProject}_Deploy"		
+						} else {
+							error('Error Creating Pipeline Project')
+						}				
+						
+						echo "Request Creating Pipeline Project: ${params.abbreviationProject}_Deploy"
+						retorno = sh(returnStdout: true, 
+								   script: " curl -s -i -XPOST http://${HOST_PORT_JENKINS}/createItem?name=${params.abbreviationProject}_Package -u ${USUARIO_SENHA_JENKINS} --data-binary @Config_Package.xml -H \"" + texto + "\" -H \"Content-Type:text/xml\"")
+						status_code = retorno.trim()
+
+						echo "HTTP response: ${status_code}"
+								  
+						if ((status_code.contains('HTTP/1.1 200'))) {
+							echo "Request Creating Pipeline Project: ${params.abbreviationProject}_Package"		
+						} else {
+							error("Error Creating Pipeline Project: ${params.abbreviationProject}_Package")
+						}					   
+					   jsonCRUMB = null
+					   CRUMBJson = null			
+				    
+                }  
+				   
+            }
+        }
+    }
+}
+
